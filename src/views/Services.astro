@@ -1,0 +1,94 @@
+---
+import { type Lang } from '../data/site';
+import { t } from '../data/i18n';
+import { serviceAnchors } from '../lib/paths';
+import PageHead from '../components/PageHead.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const d = t(lang);
+const a = serviceAnchors[lang];
+const g = d.services.groups;
+
+type Img = { src: string; w: number; h: number; alt: string };
+const img = (src: string, w: number, h: number, fr: string, en: string): Img => ({ src: `/images/${src}.webp`, w, h, alt: lang === 'fr' ? fr : en });
+
+const groups = [
+  {
+    key: 'design' as const, data: g.design,
+    imgs: [
+      img('rendu-maison-3', 398, 160, 'Rendu 3D d’une maison contemporaine avec piscine', '3D rendering of a contemporary home with pool'),
+      img('plans-techniques', 493, 701, 'Plans de construction et liste de plantation', 'Construction drawings and planting schedule'),
+      img('rendu-jardin-1', 200, 179, 'Rendu 3D d’une cour avec piscine', '3D rendering of a yard with pool'),
+    ],
+  },
+  {
+    key: 'build' as const, data: g.build,
+    imgs: [
+      img('terrasse-dalles', 588, 442, 'Terrasse en dalles de pierre près d’une piscine', 'Stone slab patio by a pool'),
+      img('cloture-cedre', 588, 440, 'Écran de cèdre à planches horizontales', 'Horizontal-board cedar screen'),
+      img('eclairage-6', 504, 504, 'Jardin d’eau éclairé', 'Lit water garden'),
+    ],
+  },
+  {
+    key: 'care' as const, data: g.care,
+    imgs: [img('allee-piscine', 588, 442, 'Plates-bandes entretenues le long d’une piscine', 'Maintained garden beds along a pool')],
+  },
+];
+---
+<PageHead title={d.services.title} lead={d.services.lead} />
+
+{groups.map((x, i) => (
+  <section class="svc" id={a[x.key]} aria-labelledby={`${a[x.key]}-h`}>
+    <div class="wrap svc-grid">
+      <div class="svc-side">
+        <p class="svc-n" aria-hidden="true">{i + 1}</p>
+        <h2 id={`${a[x.key]}-h`}>{x.data.title}</h2>
+        <p class="svc-intro">{x.data.intro}</p>
+        <div class={`svc-imgs n${x.imgs.length}`}>
+          {x.imgs.map((im) => <img src={im.src} width={im.w} height={im.h} alt={im.alt} loading="lazy" />)}
+        </div>
+      </div>
+      <div class="svc-blocks">
+        {x.data.blocks.map((b) => (
+          <div class="blk">
+            <h3>{b.title}</h3>
+            <ul class="ticks">{b.items.map((it) => <li>{it}</li>)}</ul>
+          </div>
+        ))}
+        {'note' in x.data && <p class="note">{(x.data as typeof g.design).note}</p>}
+      </div>
+    </div>
+  </section>
+))}
+
+<CtaBand lang={lang} />
+
+<style>
+  .svc { border-top: 1px solid rgba(31, 37, 34, 0.14); padding-block: clamp(3rem, 7vw, 5.5rem); }
+  .svc:nth-of-type(even) { background: var(--pierre); }
+  .svc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .svc-side { position: sticky; top: calc(var(--header-h) + 1.5rem); display: grid; gap: 1.1rem; }
+  .svc-n {
+    width: 3.2rem; height: 1.6rem; border-radius: 3.2rem 3.2rem 0 0; background: var(--soleil);
+    display: grid; place-items: end center; font-weight: 800; line-height: 1; padding-bottom: 2px;
+  }
+  .svc-intro { color: var(--mousse); font-size: var(--step-1); line-height: 1.5; }
+  .svc-imgs { display: grid; gap: 0.6rem; margin-top: 0.5rem; }
+  .svc-imgs img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-s); background: #fff; }
+  .svc-imgs.n3 { grid-template-columns: 1.4fr 1fr; grid-template-rows: auto auto; }
+  .svc-imgs.n3 img:first-child { grid-column: 1 / -1; aspect-ratio: 5 / 2; }
+  .svc-imgs.n3 img:not(:first-child) { aspect-ratio: 1; }
+  .svc-imgs.n1 img { aspect-ratio: 4 / 3; max-width: 30rem; }
+  #conception .svc-imgs img:nth-child(2), #design .svc-imgs img:nth-child(2) { object-position: top; }
+
+  .svc-blocks { display: grid; gap: 2.25rem; }
+  .blk h3 { margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--thuya); }
+  .note { font-size: var(--step--1); color: var(--mousse); border-left: 3px solid var(--lichen); padding-left: 1rem; }
+
+  @media (max-width: 860px) {
+    .svc-grid { grid-template-columns: 1fr; }
+    .svc-side { position: static; }
+  }
+</style>

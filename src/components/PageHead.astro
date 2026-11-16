@@ -1,0 +1,16 @@
+---
+interface Props { title: string; lead?: string; }
+const { title, lead } = Astro.props;
+---
+<header class="ph">
+  <div class="wrap">
+    <h1>{title}</h1>
+    {lead && <p class="lead">{lead}</p>}
+    <slot />
+  </div>
+</header>
+
+<style>
+  .ph { padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 4vw, 3rem); }
+  .ph h1 { max-width: 18ch; margin-bottom: 1.25rem; }
+</style>

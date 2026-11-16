@@ -1,0 +1,28 @@
+# Apache (current cPanel host). The contact and careers forms post to /cgi-bin on this same host.
+
+ErrorDocument 404 /404.html
+DirectoryIndex index.html
+
+# Old site URLs -> new pages (mirrors _redirects for Netlify/Cloudflare).
+# mod_rewrite with NE keeps the #anchors intact (mod_alias would escape them to %23).
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^index\.shtml$      /                        [R=301,L]
+  RewriteRule ^index_en\.shtml$   /en/                     [R=301,L]
+  RewriteRule ^(AP|GP)\.html$     /services/#conception    [R=301,NE,L]
+  RewriteRule ^(RAP|SI)\.html$    /services/#construction  [R=301,NE,L]
+  RewriteRule ^DDE\.html$         /services/#entretien     [R=301,NE,L]
+  RewriteRule ^AD\.html$          /contact/                [R=301,L]
+  RewriteRule ^(aboutus|CM|SR)\.html$ /a-propos/           [R=301,L]
+  RewriteRule ^employment\.html$  /carrieres/              [R=301,L]
+  RewriteRule ^php/               /realisations/           [R=301,L]
+  RewriteRule ^admin/             /                        [R=301,L]
+</IfModule>
+
+# Long cache for fingerprinted build assets and images
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

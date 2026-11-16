@@ -1,0 +1,199 @@
+---
+import { site, type Lang, type RouteKey } from '../data/site';
+import { t } from '../data/i18n';
+import { href, other, quoteHref, quoteRel } from '../lib/paths';
+
+interface Props { lang: Lang; current: RouteKey | null; }
+const { lang, current } = Astro.props;
+const d = t(lang);
+const items: RouteKey[] = ['services', 'projects', 'about', 'contact'];
+const alt = other(lang);
+---
+<header class="hdr">
+  <div class="hdr-in wrap">
+    <a class="brand" href={href(lang, 'home')} aria-label={`${site.name}, ${d.nav.home}`}>
+      <img src="/images/logo-roche-240.png" width="240" height="151" alt="" />
+    </a>
+
+    <nav class="nav" aria-label="Principal">
+      <ul>
+        {(['home', ...items] as RouteKey[]).map((k) => (
+          <li><a href={href(lang, k)} aria-current={current === k ? 'page' : undefined}>{d.nav[k]}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="hdr-tools">
+      <a class="social" href={site.facebook} rel="noopener" aria-label={lang === 'fr' ? `${site.name} sur Facebook` : `${site.name} on Facebook`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M13.5 21v-7.5h2.6l.4-3.1h-3V8.5c0-.9.3-1.5 1.6-1.5h1.6V4.2c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.3H7.9v3.1h2.6V21h3z"/></svg>
+      </a>
+      <a class="lang" href={href(alt, current ?? 'home')} hreflang={alt} lang={alt}>
+        <span class="sr-only">{t(alt).langName}</span><span aria-hidden="true">{alt.toUpperCase()}</span>
+      </a>
+      <a class="hdr-phone" href={site.phoneHref}>{site.phone}</a>
+      <a class="btn btn-sun hdr-quote" href={quoteHref(lang)} rel={quoteRel}><span class="q-long">{d.cta.quote}</span><span class="q-short" aria-hidden="true">{d.cta.quoteShort}</span></a>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mnav">
+        <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span><span class="menu-label">{d.nav.menu}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mnav on-dark" id="mnav" inert>
+    <nav aria-label="Mobile">
+      <ul>
+        {(['home', ...items, 'careers'] as RouteKey[]).map((k, i) => (
+          <li style={`--i:${i}`}><a href={href(lang, k)} aria-current={current === k ? 'page' : undefined}>{d.nav[k]}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <p class="mnav-foot" style="--i:6">{site.street}, {site.city}<br /><a href={site.phoneHref}>{site.phone}</a></p>
+  </div>
+</header>
+
+<script>
+  // Module script: runs after the document is parsed, so the elements below exist.
+  const btn = document.querySelector<HTMLButtonElement>('.menu-btn');
+  const panel = document.getElementById('mnav');
+  const label = btn?.querySelector('.menu-label');
+  if (btn && panel && label) {
+    const openText = label.textContent;
+    const closeText = document.documentElement.lang.startsWith('en') ? 'Close' : 'Fermer';
+    // While the menu covers the page, keep focus out of what's behind it.
+    // The Call/Quote bar stays usable on top of the menu.
+    const behind = [...document.querySelectorAll<HTMLElement>('main, .ftr')];
+    const set = (open: boolean) => {
+      btn.setAttribute('aria-expanded', String(open));
+      panel.classList.toggle('open', open);
+      panel.inert = !open;
+      behind.forEach((el) => { el.inert = open; });
+      label.textContent = open ? closeText : openText;
+      document.documentElement.classList.toggle('menu-open', open);
+    };
+    btn.addEventListener('click', () => set(btn.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panel.classList.contains('open')) { set(false); btn.focus(); }
+    });
+    window.matchMedia('(min-width: 861px)').addEventListener('change', (m) => m.matches && set(false));
+    // Coming back with the browser's Back button can restore the page from memory with the menu
+    // still open; always show it closed.
+    window.addEventListener('pageshow', (e) => { if (e.persisted) set(false); });
+  }
+</script>
+
+<style>
+  .hdr {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--thuya);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .hdr :focus-visible { outline-color: var(--soleil-2); }
+  .hdr-in { height: var(--header-h); display: flex; align-items: center; gap: 1.5rem; }
+  .brand { flex: none; display: block; }
+  .brand img { height: calc(var(--header-h) - 18px); width: auto; }
+
+  .nav { margin-left: auto; }
+  .nav ul { list-style: none; display: flex; gap: 0.25rem; margin: 0; padding: 0; }
+  .nav a {
+    display: block; padding: 0.5rem 0.8rem; text-decoration: none; color: #e8efe9; white-space: nowrap;
+    font-weight: 600; border-radius: var(--radius-s);
+    transition: background-color var(--t) var(--ease), color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+  }
+  .nav a:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+  .nav a[aria-current='page'] { color: #fff; box-shadow: inset 0 -3px 0 var(--soleil); border-radius: 0; }
+
+  .hdr-tools { display: flex; align-items: center; gap: 0.9rem; }
+  .lang {
+    font-weight: 700; font-size: 0.9rem; text-decoration: none; color: #fff;
+    min-width: 44px; min-height: 44px; display: grid; place-items: center;
+    border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 999px;
+    transition: border-color var(--t) var(--ease), background-color var(--t) var(--ease);
+  }
+  .lang:hover { border-color: #fff; background: rgba(255, 255, 255, 0.08); }
+  .social {
+    min-width: 44px; min-height: 44px; display: grid; place-items: center; color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 999px;
+    transition: border-color var(--t) var(--ease), background-color var(--t) var(--ease);
+  }
+  .social:hover { border-color: #fff; background: rgba(255, 255, 255, 0.08); }
+  .social svg { width: 20px; height: 20px; }
+  .hdr-phone {
+    font-weight: 700; color: #fff; white-space: nowrap;
+    text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 2px;
+  }
+  .hdr-phone:hover { text-decoration-color: var(--soleil); }
+  .hdr-quote { min-height: 44px; padding-block: 0.55rem; white-space: nowrap; }
+  .q-short { display: none; }
+
+  .menu-btn {
+    display: none; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0 0.85rem;
+    font: inherit; font-weight: 700; color: #fff; background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.4); border-radius: 999px; cursor: pointer;
+    transition: border-color var(--t) var(--ease), background-color var(--t) var(--ease);
+  }
+  .menu-btn:hover { border-color: #fff; background: rgba(255, 255, 255, 0.08); }
+  /* Hamburger lines fold into an X */
+  .burger { position: relative; width: 18px; height: 14px; display: inline-block; }
+  .burger i {
+    position: absolute; left: 0; width: 100%; height: 2px; border-radius: 2px; background: currentColor;
+    transition: transform 280ms var(--ease), opacity 160ms var(--ease), top 280ms var(--ease);
+  }
+  .burger i:nth-child(1) { top: 0; }
+  .burger i:nth-child(2) { top: 6px; }
+  .burger i:nth-child(3) { top: 12px; }
+  .menu-btn[aria-expanded='true'] .burger i:nth-child(1) { top: 6px; transform: rotate(45deg); }
+  .menu-btn[aria-expanded='true'] .burger i:nth-child(2) { opacity: 0; transform: scaleX(0.4); }
+  .menu-btn[aria-expanded='true'] .burger i:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
+  .mnav {
+    position: fixed; inset: var(--header-h) 0 0 0; overflow-y: auto;
+    padding: 1.5rem var(--gutter) calc(var(--bar-h) + 2rem);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    /* Closed: rolled up under the header like a blind */
+    visibility: hidden; clip-path: inset(0 0 100% 0);
+    transition: clip-path 220ms var(--ease), visibility 0s linear 220ms;
+  }
+  .mnav.open {
+    visibility: visible; clip-path: inset(0 0 0 0);
+    transition: clip-path 380ms var(--ease), visibility 0s;
+  }
+  .mnav li, .mnav-foot {
+    opacity: 0; transform: translateY(12px);
+    transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+  }
+  .mnav.open li, .mnav.open .mnav-foot {
+    opacity: 1; transform: none;
+    transition: opacity 300ms var(--ease), transform 380ms var(--ease);
+    transition-delay: calc(90ms + var(--i, 0) * 35ms);
+  }
+  .mnav ul { list-style: none; margin: 0; padding: 0; }
+  .mnav li + li { border-top: 1px solid rgba(255, 255, 255, 0.14); }
+  .mnav a {
+    display: block; padding: 0.9rem 0; text-decoration: none;
+    font-size: 1.75rem; font-weight: 800; 
+  }
+  .mnav a[aria-current='page'] { color: var(--soleil-2); }
+  .mnav-foot { margin-top: 2rem; color: #cfdbd2; }
+
+  @media (max-width: 1240px) { .hdr-phone { display: none; } }
+  @media (max-width: 1100px) {
+    .hdr-in { gap: 1rem; }
+    .nav ul { gap: 0; }
+    .nav a { padding-inline: 0.6rem; }
+    .hdr-tools { gap: 0.6rem; }
+    .q-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .q-short { display: inline; }
+  }
+  @media (min-width: 861px) { .mnav { display: none; } }
+  @media (max-width: 860px) {
+    .nav, .hdr-quote { display: none; }
+    .hdr-tools { margin-left: auto; gap: 0.6rem; }
+    .menu-btn { display: inline-flex; }
+  }
+  @media (max-width: 360px) {
+    .hdr-tools { gap: 0.45rem; }
+    .menu-btn { width: 44px; padding: 0; justify-content: center; }
+    .menu-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  }
+  /* Lock page scroll behind the open menu (on html too, for iOS Safari) */
+  :global(html.menu-open), :global(html.menu-open body) { overflow: hidden; }
+</style>

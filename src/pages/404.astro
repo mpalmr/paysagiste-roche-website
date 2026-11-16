@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import { t } from '../data/i18n';
+import { href } from '../lib/paths';
+const fr = t('fr').notFound, en = t('en').notFound;
+---
+<Base lang="fr" page={null} title="Page introuvable | Paysagiste Roche">
+  <section class="section">
+    <div class="wrap nf">
+      <h1>{fr.title}</h1>
+      <p class="lead">{fr.text}</p>
+      <p><a class="btn btn-sun" href={href('fr', 'home')}>Accueil</a></p>
+      <div lang="en-CA" class="nf-en">
+        <h2>{en.title}</h2>
+        <p>{en.text} <a href={href('en', 'home')}>Home</a></p>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .nf { display: grid; gap: 1.5rem; }
+  .nf-en { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(31,37,34,.15); }
+  .nf-en h2 { font-size: var(--step-2); margin-bottom: .5rem; }
+</style>

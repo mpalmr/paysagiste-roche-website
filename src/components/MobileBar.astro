@@ -1,0 +1,26 @@
+---
+import { site, type Lang } from '../data/site';
+import { t } from '../data/i18n';
+import Icon from './Icon.astro';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const d = t(lang);
+import { quoteHref, quoteRel } from '../lib/paths';
+---
+<div class="mbar" role="region" aria-label={d.cta.contactUs}>
+  <a class="btn btn-green" href={site.phoneHref}><Icon name="phone" />{d.cta.call}</a>
+  <a class="btn btn-sun" href={quoteHref(lang)} rel={quoteRel}><Icon name="doc" />{d.cta.quoteShort}</a>
+</div>
+
+<style>
+  .mbar { display: none; }
+  @media (max-width: 860px) {
+    .mbar {
+      position: fixed; z-index: 60; left: 0; right: 0; bottom: 0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+      padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
+      background: var(--calcaire); border-top: 1px solid rgba(31, 37, 34, 0.15);
+    }
+    .mbar .btn { min-height: 48px; }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import { site, type Lang } from '../data/site';
+import { t } from '../data/i18n';
+import PageHead from '../components/PageHead.astro';
+import FormScript from '../components/FormScript.astro';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const all = t(lang);
+const d = all.careers;
+const f = all.contact.form;
+---
+<PageHead title={d.title} lead={d.lead} />
+
+<section class="cr-sec">
+  <div class="wrap cr">
+    <form
+      class="cr-form" data-ajax data-fold-into="message" novalidate method="post" enctype="multipart/form-data"
+      action={site.careersEndpoint || undefined}
+      data-sent={d.sent} data-demo={f.demo} data-error={f.error} data-required={f.required} data-bad-email={f.badEmail}
+      data-file-too-big={d.cvTooBig} data-file-bad-type={d.cvBadType} data-file-max={site.cvMaxBytes}
+      aria-label={d.title}
+    >
+      <input type="hidden" name="language" value={lang} />
+      <fieldset class="choices" data-join=", ">
+        <legend class="field-legend">{d.teamsLabel}</legend>
+        {d.teams.map(([value, label]) => <label class="chip-input"><input type="checkbox" name="Departements" value={value} /><span>{label}</span></label>)}
+      </fieldset>
+      <fieldset class="choices">
+        <legend class="field-legend">{d.typeLabel}</legend>
+        {d.types.map(([value, label], i) => <label class="chip-input"><input type="radio" name="Type_de_travail" value={value} checked={i === 2} /><span>{label}</span></label>)}
+      </fieldset>
+
+      <div class="form-grid two">
+        <div class="field">
+          <label for="j-name">{d.name}</label>
+          <input class="input" id="j-name" name="name" autocomplete="name" required aria-describedby="j-name-err" data-fold={d.nameLabel} />
+          <p class="err" id="j-name-err"></p>
+        </div>
+        <div class="field">
+          <label for="j-email">{d.email}</label>
+          <input class="input" id="j-email" name="EMAIL" type="email" autocomplete="email" inputmode="email" required aria-describedby="j-email-err" />
+          <p class="err" id="j-email-err"></p>
+        </div>
+        <div class="field">
+          <label for="j-phone">{d.phone}</label>
+          <input class="input" id="j-phone" name="phone" type="tel" autocomplete="tel" data-fold={d.phoneLabel} />
+        </div>
+        <div class="field">
+          <label for="j-cv">{d.cv}</label>
+          <input class="file" id="j-cv" name="filename" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-describedby="j-cv-err" />
+          <p class="err" id="j-cv-err"></p>
+        </div>
+        <div class="field full">
+          <label for="j-intro">{d.intro}</label>
+          <span class="hint" id="j-intro-hint">{d.introHint}</span>
+          <textarea class="input" id="j-intro" name="message" required aria-describedby="j-intro-hint j-intro-err"></textarea>
+          <p class="err" id="j-intro-err"></p>
+        </div>
+        <div class="full"><button class="btn btn-green" type="submit">{d.send}</button></div>
+        <p class="form-status full" role="status" tabindex="-1"></p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<FormScript />
+
+<style>
+  .cr-sec { padding-bottom: clamp(3.5rem, 8vw, 6rem); }
+  .cr-form {
+    max-width: 52rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; background: var(--pierre);
+    border: 1px solid rgba(31, 37, 34, 0.1); border-radius: var(--radius-s); padding: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .field-legend { font-weight: 700; font-size: 0.95rem; width: 100%; }
+  .file { font: inherit; font-size: 0.95rem; min-height: 48px; padding-top: 0.6rem; width: 100%; max-width: 100%; }
+  .file::file-selector-button {
+    font: inherit; font-weight: 700; margin-right: 0.75rem; padding: 0.5rem 0.9rem; cursor: pointer;
+    border: 1.5px solid var(--thuya); border-radius: var(--radius-s); background: #fff; color: var(--thuya);
+    transition: background-color var(--t) var(--ease);
+  }
+  .file::file-selector-button:hover { background: var(--calcaire); }
+</style>

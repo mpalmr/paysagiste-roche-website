@@ -1,0 +1,72 @@
+---
+import { site, type Lang, type RouteKey } from '../data/site';
+import { t } from '../data/i18n';
+import { href } from '../lib/paths';
+import Icon from './Icon.astro';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const d = t(lang);
+const links: RouteKey[] = ['services', 'projects', 'about', 'contact', 'careers'];
+const year = new Date().getFullYear();
+---
+<footer class="ftr on-dark">
+  <div class="wrap ftr-grid">
+    <div class="ftr-brand">
+      <img src="/images/logo-roche-240.png" width="240" height="151" alt={site.name} loading="lazy" />
+      <p>{d.footer.tagline}</p>
+    </div>
+
+    <div>
+      <h2 class="ftr-h">{d.contact.addressLabel}</h2>
+      <address>
+        {site.street}<br />{site.city} ({site.region}) {site.postal}<br />
+        <a href={site.phoneHref}>{site.phone}</a><br />
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </address>
+    </div>
+
+    <div>
+      <h2 class="ftr-h">{d.footer.hours}</h2>
+      <dl class="hours">
+        {d.hours.map(([day, h]) => (<><dt>{day}</dt><dd>{h}</dd></>))}
+      </dl>
+    </div>
+
+    <nav aria-label="Pied de page">
+      <h2 class="ftr-h">{site.name}</h2>
+      <ul>
+        {links.map((k) => <li><a href={href(lang, k)}>{d.nav[k]}</a></li>)}
+        <li><a href={site.facebook} rel="noopener"><Icon name="fb" />{d.footer.follow}</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="wrap ftr-legal">
+    <p>{d.footer.licence} {site.rbq}. {d.footer.standards}</p>
+    <p>© {site.founded}–{year} {site.legalName} {d.footer.rights}</p>
+  </div>
+</footer>
+
+<style>
+  .ftr { padding-block: 3.5rem 2rem; font-size: 0.95rem; }
+  .ftr-grid { display: grid; gap: 2.25rem; grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+  .ftr-brand img { width: 140px; height: auto; margin-bottom: 1rem; }
+  .ftr-brand p { max-width: 22rem; color: #cfdbd2; }
+  .ftr-h { font-size: 1rem; letter-spacing: 0; margin-bottom: 0.75rem; }
+  address { font-style: normal; line-height: 1.8; }
+  .hours { display: grid; grid-template-columns: auto auto; gap: 0.2rem 1rem; margin: 0; justify-content: start; }
+  .hours dd { margin: 0; color: #cfdbd2; }
+  ul { list-style: none; margin: 0; padding: 0; line-height: 2; }
+  ul a { display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: underline; text-decoration-color: transparent; }
+  ul a:hover { text-decoration-color: currentColor; }
+  ul :global(svg) { width: 1em; height: 1em; }
+  @media (pointer: coarse) { ul { line-height: 1.4; } ul a { min-height: 44px; } }
+  .ftr-legal {
+    margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; justify-content: space-between; color: #a9bbb0; font-size: 0.85rem;
+  }
+  .ftr-legal p { margin: 0; }
+  @media (max-width: 960px) { .ftr-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .ftr-grid { grid-template-columns: 1fr; } }
+</style>

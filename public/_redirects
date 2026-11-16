@@ -1,0 +1,15 @@
+# Old site URLs -> new pages (Netlify / Cloudflare Pages format)
+/index.shtml        /                         301
+/index_en.shtml     /en/                      301
+/AP.html            /services/#conception     301
+/GP.html            /services/#conception     301
+/RAP.html           /services/#construction   301
+/SI.html            /services/#construction   301
+/DDE.html           /services/#entretien      301
+/AD.html            /contact/                 301
+/aboutus.html       /a-propos/                301
+/CM.html            /a-propos/                301
+/SR.html            /a-propos/                301
+/employment.html    /carrieres/               301
+/php/*              /realisations/            301
+/admin/*            /                         301

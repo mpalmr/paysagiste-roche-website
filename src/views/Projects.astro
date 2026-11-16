@@ -1,0 +1,219 @@
+---
+import { type Lang } from '../data/site';
+import { t } from '../data/i18n';
+import { photos, type Cat } from '../data/gallery';
+import PageHead from '../components/PageHead.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const d = t(lang).projects;
+const cats = Object.keys(d.cats) as Cat[];
+const countFor = (c: Cat | 'all') => (c === 'all' ? photos.length : photos.filter((p) => p.cat === c).length);
+---
+<PageHead title={d.title} lead={d.lead}>
+  <div class="filters" role="group" aria-label={d.title}>
+    <button type="button" aria-pressed="true" data-filter="all">{d.all} <span>{countFor('all')}</span></button>
+    {cats.map((c) => <button type="button" aria-pressed="false" data-filter={c}>{d.cats[c]} <span>{countFor(c)}</span></button>)}
+  </div>
+  <p class="sr-only" aria-live="polite" id="gal-count"></p>
+</PageHead>
+
+<section class="gal-sec" aria-label={d.title}>
+  <div class="wrap">
+    <ul class="gal">
+      {photos.map((p, i) => (
+        <li data-cat={p.cat} class:list={[{ small: p.w < 300 }]}>
+          <button type="button" class="tile" data-i={i}>
+            <img src={p.src} width={p.w} height={p.h} alt={p[lang]} loading={i < 6 ? 'eager' : 'lazy'} />
+            <span class="cap">{p[lang]}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<dialog class="lb" aria-label={d.title}>
+  <figure>
+    <img alt="" />
+    <figcaption><span class="lb-cap"></span> <span class="lb-pos"></span></figcaption>
+  </figure>
+  <button type="button" class="lb-btn lb-close" aria-label={d.close}><Icon name="close" /></button>
+  <button type="button" class="lb-btn lb-prev" aria-label={d.prev}><Icon name="chev-l" /></button>
+  <button type="button" class="lb-btn lb-next" aria-label={d.next}><Icon name="chev-r" /></button>
+</dialog>
+
+<CtaBand lang={lang} />
+
+<script type="application/json" id="gal-data" set:html={JSON.stringify({ photos: photos.map((p) => ({ src: p.src, w: p.w, h: p.h, alt: p[lang] })) })} />
+
+<script>
+  // Module script (deferred): runs once the HTML is parsed, wherever it sits in the page.
+  type Photo = { src: string; w: number; h: number; alt: string };
+  const dataEl = document.getElementById('gal-data');
+  const gal = document.querySelector<HTMLElement>('.gal');
+  const dlg = document.querySelector<HTMLDialogElement>('.lb');
+  const live = document.getElementById('gal-count');
+
+  if (dataEl && gal && dlg && live) {
+    const { photos } = JSON.parse(dataEl.textContent || '{}') as { photos: Photo[] };
+    const items = [...gal.querySelectorAll<HTMLLIElement>('li')];
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('.filters button')];
+    const word = (n: number) => `${n} photo${n > 1 ? 's' : ''}`;
+    let visible = items.map((_, i) => i);
+
+    // ---- Filters ----
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let busy: Animation | null = null;
+    const apply = (f: string) => {
+      visible = [];
+      items.forEach((li, i) => {
+        const show = f === 'all' || li.dataset.cat === f;
+        li.hidden = !show;
+        if (show) visible.push(i);
+      });
+      live.textContent = word(visible.length);
+    };
+    buttons.forEach((b) => b.addEventListener('click', async () => {
+      if (b.getAttribute('aria-pressed') === 'true') return;
+      const f = b.dataset.filter ?? 'all';
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      if (calm.matches || typeof gal.animate !== 'function') { apply(f); return; }
+      // Quick fade out, swap the photos, then fade the new set in with a slight rise.
+      // Tiles can't be opened mid-swap, so a photo that's about to disappear never opens.
+      busy?.cancel();
+      gal.style.pointerEvents = 'none';
+      busy = gal.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: 'ease-out', fill: 'forwards' });
+      try { await busy.finished; } catch { return; } // a newer click took over
+      apply(f);
+      gal.style.pointerEvents = '';
+      busy = gal.animate(
+        [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 280, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'forwards' },
+      );
+    }));
+
+    // ---- Lightbox ----
+    const img = dlg.querySelector('img')!;
+    const cap = dlg.querySelector('.lb-cap')!;
+    const pos = dlg.querySelector('.lb-pos')!;
+    let cur = 0;
+    const show = (i: number) => {
+      const p = photos[i];
+      if (!p) return;
+      cur = i;
+      img.src = p.src; img.alt = p.alt; img.width = p.w; img.height = p.h;
+      img.style.maxWidth = `min(100%, ${Math.round(p.w * (p.w < 300 ? 2.2 : 1.5))}px)`;
+      cap.textContent = p.alt;
+      const k = visible.indexOf(i);
+      pos.textContent = k >= 0 ? `${k + 1} / ${visible.length}` : '';
+    };
+    const step = (dir: number) => {
+      if (visible.length < 2) return;
+      const k = Math.max(0, visible.indexOf(cur));
+      show(visible[(k + dir + visible.length) % visible.length]);
+    };
+    const open = (i: number) => {
+      show(i);
+      if (!dlg.open) dlg.showModal();
+      document.documentElement.classList.add('lb-open');
+    };
+    gal.addEventListener('click', (e) => {
+      const t = (e.target as Element).closest<HTMLElement>('.tile');
+      if (t) open(Number(t.dataset.i));
+    });
+    dlg.querySelector('.lb-close')?.addEventListener('click', () => dlg.close());
+    dlg.querySelector('.lb-prev')?.addEventListener('click', () => step(-1));
+    dlg.querySelector('.lb-next')?.addEventListener('click', () => step(1));
+    // Clicking the dark area around the photo closes it (the dialog or the padded figure).
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg || (e.target as Element).matches('figure')) dlg.close();
+    });
+    dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    });
+    dlg.addEventListener('close', () => {
+      document.documentElement.classList.remove('lb-open');
+      gal.querySelector<HTMLElement>(`.tile[data-i="${cur}"]`)?.focus();
+    });
+    // Swipe with one finger; ignore pinch-zoom.
+    let x0: number | null = null;
+    dlg.addEventListener('touchstart', (e) => { x0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+    dlg.addEventListener('touchmove', (e) => { if (e.touches.length > 1) x0 = null; }, { passive: true });
+    dlg.addEventListener('touchend', (e) => {
+      if (x0 === null || e.changedTouches.length !== 1) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+      x0 = null;
+    });
+    // Don't come back to an open viewer via the Back button.
+    window.addEventListener('pagehide', () => { if (dlg.open) dlg.close(); });
+  }
+</script>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; }
+  .filters button {
+    font: inherit; font-weight: 700; font-size: 0.95rem; min-height: 44px; padding: 0.4rem 0.95rem; cursor: pointer;
+    border: 1.5px solid rgba(24, 58, 44, 0.3); border-radius: 999px; background: var(--pierre); color: var(--thuya);
+    transition: background-color var(--t) var(--ease), border-color var(--t) var(--ease), color var(--t) var(--ease);
+  }
+  .filters button span { font-weight: 500; opacity: 0.7; margin-left: 0.15rem; }
+  .filters button:hover { border-color: var(--thuya); }
+  .filters button[aria-pressed='true'] { background: var(--thuya); border-color: var(--thuya); color: #fff; }
+
+  .gal-sec { padding-bottom: clamp(3.5rem, 8vw, 6rem); }
+  .gal { list-style: none; margin: 0; padding: 0; columns: 3 18rem; column-gap: 0.75rem; }
+  .gal li { break-inside: avoid; margin-bottom: 0.75rem; }
+  .gal li[hidden] { display: none; }
+  .tile {
+    display: block; width: 100%; padding: 0; border: 0; background: #fff; cursor: zoom-in; position: relative;
+    border-radius: var(--radius-s); overflow: hidden; text-align: left; font: inherit;
+  }
+  .tile img { width: 100%; transition: transform 450ms var(--ease); }
+  .tile:hover img { transform: scale(1.025); }
+  .small .tile img { image-rendering: auto; }
+  .cap {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 2rem 0.85rem 0.7rem;
+    color: #fff; font-size: 0.9rem; font-weight: 600; line-height: 1.3;
+    background: linear-gradient(transparent, rgba(16, 32, 25, 0.82));
+    opacity: 0; transition: opacity 250ms var(--ease);
+  }
+  .tile:hover .cap, .tile:focus-visible .cap { opacity: 1; }
+  @media (hover: none) and (min-width: 561px) { .cap { opacity: 1; } }
+  @media (max-width: 560px) { .gal { columns: 2; column-gap: 0.5rem; } .gal li { margin-bottom: 0.5rem; } .cap { display: none; } }
+
+  .lb {
+    /* inset rather than 100vw, so the viewer stops at the scrollbar on desktop */
+    inset: 0; width: auto; height: auto; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+    background: rgba(12, 22, 17, 0.94); color: #fff;
+  }
+  .lb::backdrop { background: rgba(12, 22, 17, 0.6); }
+  :global(html.lb-open) { overflow: hidden; }
+  .lb { overscroll-behavior: contain; }
+  .lb[open] { display: grid; place-items: center; }
+  .lb figure { margin: 0; padding: 4.5rem 4.5rem 1.5rem; display: grid; justify-items: center; gap: 0.9rem; width: 100%; max-height: 100dvh; }
+  .lb img { width: 100%; height: auto; max-height: calc(100dvh - 9rem); object-fit: contain; border-radius: var(--radius-s); }
+  .lb figcaption { text-align: center; font-weight: 600; }
+  .lb-pos { color: #a9bbb0; font-weight: 400; margin-left: 0.5rem; }
+  .lb-btn {
+    position: absolute; width: 48px; height: 48px; display: grid; place-items: center; cursor: pointer;
+    border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, 0.4); background: rgba(0, 0, 0, 0.35); color: #fff;
+    transition: background-color var(--t) var(--ease), border-color var(--t) var(--ease);
+  }
+  .lb-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: #fff; }
+  .lb-btn :global(svg) { width: 22px; height: 22px; }
+  .lb-btn:focus-visible { outline: 3px solid var(--soleil-2); outline-offset: 2px; }
+  .lb-close { top: 1rem; right: 1rem; }
+  .lb-prev { left: 1rem; top: 50%; translate: 0 -50%; }
+  .lb-next { right: 1rem; top: 50%; translate: 0 -50%; }
+  @media (max-width: 640px) {
+    .lb figure { padding: 4.25rem 0.75rem 6rem; }
+    .lb-prev, .lb-next { top: auto; bottom: 1.25rem; translate: none; }
+    .lb-prev { left: calc(50% - 60px); }
+    .lb-next { right: calc(50% - 60px); }
+  }
+</style>

@@ -1,0 +1,92 @@
+---
+import { type Lang } from '../data/site';
+import { t } from '../data/i18n';
+import PageHead from '../components/PageHead.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const d = t(lang).about;
+---
+<PageHead title={d.title} lead={d.lead} />
+
+<section class="story-sec" aria-labelledby="story-h">
+  <div class="wrap story">
+    <div class="measure">
+      <h2 id="story-h">{d.storyTitle}</h2>
+      {d.story.map((p) => <p>{p}</p>)}
+    </div>
+    <div class="story-imgs">
+      <img src="/images/chantier-2.webp" width="504" height="504" alt={d.teamAlt} loading="lazy" />
+      <img src="/images/chantier-4.webp" width="504" height="504" alt={d.signAlt} loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<section class="section on-dark" aria-labelledby="tl-h">
+  <div class="wrap">
+    <h2 id="tl-h" class="tl-h">{d.timelineTitle}</h2>
+    <ol class="tl">
+      {d.timeline.map(([y, txt]) => (
+        <li><span class="tl-y">{y}</span><span class="tl-t">{txt}</span></li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="sus-h">
+  <div class="wrap two">
+    <div>
+      <h2 id="sus-h" class="sub-h">{d.sustainTitle}</h2>
+      <dl class="pairs">
+        {d.sustain.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+      </dl>
+    </div>
+    <div>
+      <h2 class="sub-h">{d.credTitle}</h2>
+      <dl class="pairs">
+        {d.cred.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+      </dl>
+    </div>
+  </div>
+</section>
+
+<CtaBand lang={lang} />
+
+<style>
+  .story-sec { padding-bottom: clamp(3.5rem, 8vw, 6rem); }
+  .story { display: grid; grid-template-columns: 1fr minmax(0, 0.9fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .story h2 { font-size: var(--step-2); margin-bottom: 1.25rem; }
+  .story p { font-size: 1.1rem; line-height: 1.65; }
+  .story-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .story-imgs img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-s); }
+  .story-imgs img:last-child { margin-top: 3rem; }
+  @media (max-width: 860px) { .story { grid-template-columns: 1fr; } .story-imgs img:last-child { margin-top: 0; } }
+
+  .tl-h { font-size: var(--step-2); margin-bottom: 2.5rem; }
+  .tl { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .tl li { position: relative; border-top: 2px solid rgba(255, 255, 255, 0.25); padding: 1.5rem 1.25rem 0 0; display: grid; gap: 0.6rem; align-content: start; }
+  .tl li::before {
+    content: ''; position: absolute; left: 0; top: calc(-0.55rem - 1px);
+    width: 1.1rem; height: 0.55rem; border-radius: 1rem 1rem 0 0; background: var(--soleil);
+  }
+  .tl-y {
+    font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem); font-weight: 800; line-height: 1; color: var(--soleil-2);
+  }
+  .tl-t { color: #dfe8e2; }
+  @media (max-width: 860px) {
+    .tl { grid-template-columns: 1fr; border-left: 2px solid rgba(255, 255, 255, 0.25); margin-left: 0.3rem; }
+    .tl li { border-top: 0; padding: 0 0 1.75rem 1.5rem; grid-template-columns: 5.5rem 1fr; align-items: baseline; gap: 1rem; }
+    .tl li:last-child { padding-bottom: 0; }
+    .tl li::before { left: -0.35rem; top: 0.45rem; width: 0.6rem; height: 0.6rem; border-radius: 50%; }
+    .tl-y { font-size: 1.5rem; }
+  }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2.5rem, 6vw, 5rem); }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+  .sub-h { font-size: var(--step-2); margin-bottom: 1.5rem; }
+  .pairs { margin: 0; display: grid; gap: 1.25rem; }
+  .pairs > div { border-top: 2px solid var(--thuya); padding-top: 0.85rem; }
+  .pairs dt { font-weight: 700; margin-bottom: 0.2rem; }
+  .pairs dd { margin: 0; color: var(--mousse); }
+</style>
