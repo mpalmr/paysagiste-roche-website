@@ -26,6 +26,8 @@ npm run check    # type-check
 
 Deploy `dist/` to any static host (Netlify, Cloudflare Pages, Vercel, GitHub Pages, or the current cPanel host via FTP).
 
+**GitHub Pages preview:** `.github/workflows/pages.yml` builds and deploys on every push to `master`, at `https://mpalmr.github.io/paysagiste-roche-website/`. It sets `BASE_PATH=/paysagiste-roche-website` (all internal links and images go through `withBase()` in `src/lib/paths.ts`) and empties the form endpoints, since Pages has no `/cgi-bin`. One-time setup: repo Settings → Pages → Source: **GitHub Actions**. Pages ignores `_redirects` and `.htaccess`, so old URLs won't redirect there.
+
 ## Where things live
 
 - `src/data/site.ts`: phone, address, RBQ licence, quote-portal URL, form endpoint

@@ -1,7 +1,7 @@
 ---
 import { site, type Lang, type RouteKey } from '../data/site';
 import { t } from '../data/i18n';
-import { href } from '../lib/paths';
+import { withBase, href } from '../lib/paths';
 import Icon from './Icon.astro';
 
 interface Props { lang: Lang; }
@@ -13,7 +13,7 @@ const year = new Date().getFullYear();
 <footer class="ftr on-dark">
   <div class="wrap ftr-grid">
     <div class="ftr-brand">
-      <img src="/images/logo-roche-240.png" width="240" height="151" alt={site.name} loading="lazy" />
+      <img src={withBase('/images/logo-roche-240.png')} width="240" height="151" alt={site.name} loading="lazy" />
       <p>{d.footer.tagline}</p>
     </div>
 

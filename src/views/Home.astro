@@ -1,7 +1,7 @@
 ---
 import { site, type Lang } from '../data/site';
 import { t } from '../data/i18n';
-import { href, serviceAnchors, quoteHref, quoteRel } from '../lib/paths';
+import { withBase, href, serviceAnchors, quoteHref, quoteRel } from '../lib/paths';
 import Icon from '../components/Icon.astro';
 import CtaBand from '../components/CtaBand.astro';
 
@@ -12,17 +12,17 @@ const g = d.services.groups;
 const a = serviceAnchors[lang];
 
 const steps = [
-  { key: 'design', verb: lang === 'fr' ? 'Concevoir' : 'Plan', img: '/images/rendu-maison-1.webp', w: 398, h: 152, g: g.design },
-  { key: 'build', verb: lang === 'fr' ? 'Construire' : 'Build', img: '/images/terrasse-dalles.webp', w: 588, h: 442, g: g.build },
-  { key: 'care', verb: lang === 'fr' ? 'Entretenir' : 'Maintain', img: '/images/allee-piscine.webp', w: 588, h: 442, g: g.care },
+  { key: 'design', verb: lang === 'fr' ? 'Concevoir' : 'Plan', img: withBase('/images/rendu-maison-1.webp'), w: 398, h: 152, g: g.design },
+  { key: 'build', verb: lang === 'fr' ? 'Construire' : 'Build', img: withBase('/images/terrasse-dalles.webp'), w: 588, h: 442, g: g.build },
+  { key: 'care', verb: lang === 'fr' ? 'Entretenir' : 'Maintain', img: withBase('/images/allee-piscine.webp'), w: 588, h: 442, g: g.care },
 ] as const;
 
 const featured = [
-  { src: '/images/piscine-vivaces.webp', w: 960, h: 682, fr: 'Piscine bordée de graminées et d’échinacées', en: 'Pool edged with grasses and coneflowers' },
-  { src: '/images/escalier-piscine.webp', w: 588, h: 442, fr: 'Escalier en bois et dalles de pierre', en: 'Wood stairs and stone slabs' },
-  { src: '/images/cour-pave-cloture.webp', w: 588, h: 440, fr: 'Cour en pavé et clôture de cèdre', en: 'Paver yard and cedar fence' },
-  { src: '/images/eclairage-6.webp', w: 504, h: 504, fr: 'Jardin d’eau éclairé', en: 'Lit water garden' },
-  { src: '/images/terrasse-cedre.webp', w: 588, h: 440, fr: 'Terrasse et banc-jardinière en cèdre', en: 'Cedar deck and planter bench' },
+  { src: withBase('/images/piscine-vivaces.webp'), w: 960, h: 682, fr: 'Piscine bordée de graminées et d’échinacées', en: 'Pool edged with grasses and coneflowers' },
+  { src: withBase('/images/escalier-piscine.webp'), w: 588, h: 442, fr: 'Escalier en bois et dalles de pierre', en: 'Wood stairs and stone slabs' },
+  { src: withBase('/images/cour-pave-cloture.webp'), w: 588, h: 440, fr: 'Cour en pavé et clôture de cèdre', en: 'Paver yard and cedar fence' },
+  { src: withBase('/images/eclairage-6.webp'), w: 504, h: 504, fr: 'Jardin d’eau éclairé', en: 'Lit water garden' },
+  { src: withBase('/images/terrasse-cedre.webp'), w: 588, h: 440, fr: 'Terrasse et banc-jardinière en cèdre', en: 'Cedar deck and planter bench' },
 ];
 ---
 <section class="hero">
@@ -38,7 +38,7 @@ const featured = [
     </div>
     <div class="arch-wrap">
       <div class="arch">
-        <img src="/images/piscine-vivaces.webp" width="960" height="682" alt={d.home.heroAlt} fetchpriority="high" />
+        <img src={withBase('/images/piscine-vivaces.webp')} width="960" height="682" alt={d.home.heroAlt} fetchpriority="high" />
       </div>
     </div>
   </div>
@@ -105,7 +105,7 @@ const featured = [
 
 <section class="section about-teaser" aria-labelledby="about-h">
   <div class="wrap about-grid">
-    <img src="/images/chantier-2.webp" width="504" height="504" alt={d.about.teamAlt} loading="lazy" />
+    <img src={withBase('/images/chantier-2.webp')} width="504" height="504" alt={d.about.teamAlt} loading="lazy" />
     <div class="measure">
       <h2 id="about-h">{d.home.aboutTitle}</h2>
       <p class="about-p">{d.home.aboutText}</p>

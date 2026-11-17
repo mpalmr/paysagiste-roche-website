@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import MobileBar from '../components/MobileBar.astro';
 import { site, routes, type Lang, type RouteKey } from '../data/site';
 import { t } from '../data/i18n';
+import { withBase } from '../lib/paths';
 
 interface Props { lang: Lang; page: RouteKey | null; title?: string; description?: string; }
 const { lang, page } = Astro.props;
@@ -56,7 +57,7 @@ const jsonLd = {
     <meta property="og:image" content={new URL('/images/og.jpg', site.url).href} />
     <meta property="og:locale" content={lang === 'fr' ? 'fr_CA' : 'en_CA'} />
     <meta name="theme-color" content="#183a2c" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href={withBase('/favicon.png')} />
     {page === 'home' && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body>

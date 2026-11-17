@@ -1,6 +1,7 @@
 ---
 import { type Lang } from '../data/site';
 import { t } from '../data/i18n';
+import { withBase } from '../lib/paths';
 import PageHead from '../components/PageHead.astro';
 import CtaBand from '../components/CtaBand.astro';
 
@@ -17,8 +18,8 @@ const d = t(lang).about;
       {d.story.map((p) => <p>{p}</p>)}
     </div>
     <div class="story-imgs">
-      <img src="/images/chantier-2.webp" width="504" height="504" alt={d.teamAlt} loading="lazy" />
-      <img src="/images/chantier-4.webp" width="504" height="504" alt={d.signAlt} loading="lazy" />
+      <img src={withBase('/images/chantier-2.webp')} width="504" height="504" alt={d.teamAlt} loading="lazy" />
+      <img src={withBase('/images/chantier-4.webp')} width="504" height="504" alt={d.signAlt} loading="lazy" />
     </div>
   </div>
 </section>

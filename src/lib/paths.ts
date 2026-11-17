@@ -1,6 +1,9 @@
 import { routes, site, type Lang, type RouteKey } from '../data/site';
 
-export const href = (lang: Lang, key: RouteKey, hash = '') => routes[key][lang] + (hash ? `#${hash}` : '');
+// Prefix a root-relative path with the deploy base (e.g. /paysagiste-roche-website on GitHub Pages).
+export const withBase = (path: string) => import.meta.env.BASE_URL.replace(/\/$/, '') + path;
+
+export const href = (lang: Lang, key: RouteKey, hash = '') => withBase(routes[key][lang]) + (hash ? `#${hash}` : '');
 
 export const other = (lang: Lang): Lang => (lang === 'fr' ? 'en' : 'fr');
 

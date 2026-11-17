@@ -1,7 +1,7 @@
 ---
 import { type Lang } from '../data/site';
 import { t } from '../data/i18n';
-import { serviceAnchors } from '../lib/paths';
+import { serviceAnchors, withBase } from '../lib/paths';
 import PageHead from '../components/PageHead.astro';
 import CtaBand from '../components/CtaBand.astro';
 
@@ -12,7 +12,7 @@ const a = serviceAnchors[lang];
 const g = d.services.groups;
 
 type Img = { src: string; w: number; h: number; alt: string };
-const img = (src: string, w: number, h: number, fr: string, en: string): Img => ({ src: `/images/${src}.webp`, w, h, alt: lang === 'fr' ? fr : en });
+const img = (src: string, w: number, h: number, fr: string, en: string): Img => ({ src: withBase(`/images/${src}.webp`), w, h, alt: lang === 'fr' ? fr : en });
 
 const groups = [
   {

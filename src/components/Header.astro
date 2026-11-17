@@ -1,7 +1,7 @@
 ---
 import { site, type Lang, type RouteKey } from '../data/site';
 import { t } from '../data/i18n';
-import { href, other, quoteHref, quoteRel } from '../lib/paths';
+import { withBase, href, other, quoteHref, quoteRel } from '../lib/paths';
 
 interface Props { lang: Lang; current: RouteKey | null; }
 const { lang, current } = Astro.props;
@@ -12,7 +12,7 @@ const alt = other(lang);
 <header class="hdr">
   <div class="hdr-in wrap">
     <a class="brand" href={href(lang, 'home')} aria-label={`${site.name}, ${d.nav.home}`}>
-      <img src="/images/logo-roche-240.png" width="240" height="151" alt="" />
+      <img src={withBase('/images/logo-roche-240.png')} width="240" height="151" alt="" />
     </a>
 
     <nav class="nav" aria-label="Principal">

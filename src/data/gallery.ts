@@ -1,3 +1,5 @@
+import { withBase } from '../lib/paths';
+
 export type Cat = 'pool' | 'wood' | 'light' | 'design' | 'site';
 
 export interface Photo {
@@ -10,7 +12,7 @@ export interface Photo {
 }
 
 const p = (src: string, w: number, h: number, cat: Cat, fr: string, en: string): Photo => ({
-  src: `/images/${src}.webp`, w, h, cat, fr, en,
+  src: withBase(`/images/${src}.webp`), w, h, cat, fr, en,
 });
 
 // Captions describe only what is visible in each photo.
